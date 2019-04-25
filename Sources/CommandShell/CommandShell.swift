@@ -51,24 +51,21 @@ public class Shell {
     }
     
     class func buildDocumentation(for commands: [Command]) -> String {
-        var usages: [String] = []
         var arguments: [String:String] = [:]
         var options = [ "--help": "Show this help."]
         var results: [Result] = [ .ok, .unknownCommand, .badArguments, .runFailed ]
         
+        let name = CommandLine.name
+        var usageText = ""
         for command in commands {
-            usages.append(contentsOf: command.usage)
+            for usage in command.usage {
+                usageText += "    \(name) \(command.name) \(usage)\n"
+            }
             arguments.merge(command.arguments, uniquingKeysWith: { (k1, k2) in return k1 })
             options.merge(command.options, uniquingKeysWith: { (k1, k2) in return k1 })
             results.append(contentsOf: command.returns)
         }
         
-        let name = CommandLine.name
-        var usageText = ""
-        for usage in usages {
-            usageText += "    \(name) \(usage)\n"
-        }
-
         var optionText = ""
         for option in options {
             optionText += "    \(option.key)     \(option.value)\n"
