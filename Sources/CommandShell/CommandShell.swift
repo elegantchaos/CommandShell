@@ -8,12 +8,22 @@ import Foundation
 
 public class Shell {
     let commands: [Command]
+    let defaultCommand: Command?
     public let arguments: Arguments
     
     public init(commands: [Command]) {
         self.commands = commands
         let documentation = Shell.buildDocumentation(for: commands)
         self.arguments = Arguments(documentation: documentation, version: "1.0")
+
+        var defaultCommand: Command? = nil
+        for command in commands {
+            if command.name.isEmpty {
+                defaultCommand = command
+                break
+            }
+        }
+        self.defaultCommand = defaultCommand
     }
     
     public func exit(result: Result) -> Never {
@@ -33,19 +43,27 @@ public class Shell {
     public func run() {
         for command in commands {
             if arguments.command(command.name) {
-                do {
-                    let result = try command.run(shell: self)
-                    exit(result: result)
-                    
-                } catch {
-                    exit(result: Result.runFailed.adding(supplementary: String(describing: error)))
-                }
+                run(command: command)
             }
+        }
+        
+        if let defaultCommand = defaultCommand {
+            run(command: defaultCommand)
         }
         
         exit(result: .badArguments)
     }
 
+    internal func run(command: Command) {
+        do {
+            let result = try command.run(shell: self)
+            exit(result: result)
+            
+        } catch {
+            exit(result: Result.runFailed.adding(supplementary: String(describing: error)))
+        }
+    }
+    
     public func log(_ message: String) {
         print(message)
     }
@@ -55,11 +73,12 @@ public class Shell {
         var options = [ "--help": "Show this help."]
         var results: [Result] = [ .ok, .unknownCommand, .badArguments, .runFailed ]
         
-        let name = CommandLine.name
+        let appName = CommandLine.name
         var usageText = ""
         for command in commands {
             for usage in command.usage {
-                usageText += "    \(name) \(command.name) \(usage)\n"
+                let commandName = command.name.isEmpty ? "" : "\(command.name) "
+                usageText += "    \(appName) \(commandName)\(usage)\n"
             }
             arguments.merge(command.arguments, uniquingKeysWith: { (k1, k2) in return k1 })
             options.merge(command.options, uniquingKeysWith: { (k1, k2) in return k1 })
