@@ -14,6 +14,8 @@ open class Command {
 
     open var usage: [String] { return [] }
     
+    open var help: String { return "" }
+    
     open var arguments: [String:String] { return [:] }
     
     open var options: [String:String] { return [:] }

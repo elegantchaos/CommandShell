@@ -71,15 +71,24 @@ public class Shell {
     class func buildDocumentation(for commands: [Command]) -> String {
         var arguments: [String:String] = [:]
         var options = [ "--help": "Show this help."]
+        var helps: [String] = []
         var results: [Result] = [ .ok, .unknownCommand, .badArguments, .runFailed ]
         
         let appName = CommandLine.name
         var usageText = ""
-        for command in commands {
+        var helpText = ""
+       for command in commands {
             for usage in command.usage {
-                let commandName = command.name.isEmpty ? "" : "\(command.name) "
-                usageText += "    \(appName) \(commandName)\(usage)\n"
+                let commandName = command.name
+                if commandName.isEmpty {
+                    usageText += "    \(appName) \(usage)\n"
+                } else {
+                    usageText += "    \(appName) \(commandName) \(usage)\n"
+                    helpText += "    \(commandName)    \(command.help)\n"
+                }
+
             }
+            helps.append(command.help)
             arguments.merge(command.arguments, uniquingKeysWith: { (k1, k2) in return k1 })
             options.merge(command.options, uniquingKeysWith: { (k1, k2) in return k1 })
             results.append(contentsOf: command.returns)
@@ -105,12 +114,23 @@ public class Shell {
             resultText += "    \(key.code)    \(key.description)\n"
         }
         
-        return """
+        var text = """
         Various release utilities.
         
         Usage:
         \(usageText)
         
+        """
+        
+        if !helpText.isEmpty {
+            text += """
+        Commands:
+        \(helpText)
+        
+        """
+        }
+        
+        text += """
         Arguments:
         \(argumentText)
         
@@ -124,6 +144,8 @@ public class Shell {
         \(resultText)
         
         """
+            
+        return text
     }
     
 }
