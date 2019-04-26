@@ -18,7 +18,7 @@ public class Shell {
 
         var defaultCommand: Command? = nil
         for command in commands {
-            if command.name.isEmpty {
+            if command.description.name.isEmpty {
                 defaultCommand = command
                 break
             }
@@ -42,7 +42,7 @@ public class Shell {
     
     public func run() {
         for command in commands {
-            if arguments.command(command.name) {
+            if arguments.command(command.description.name) {
                 run(command: command)
             }
         }
@@ -78,20 +78,21 @@ public class Shell {
         var usageText = ""
         var helpText = ""
        for command in commands {
-            for usage in command.usage {
-                let commandName = command.name
+            let description = command.description
+            for usage in description.usage {
+                let commandName = description.name
                 if commandName.isEmpty {
                     usageText += "    \(appName) \(usage)\n"
                 } else {
                     usageText += "    \(appName) \(commandName) \(usage)\n"
-                    helpText += "    \(commandName)    \(command.help)\n"
+                    helpText += "    \(commandName)    \(description.help)\n"
                 }
 
             }
-            helps.append(command.help)
-            arguments.merge(command.arguments, uniquingKeysWith: { (k1, k2) in return k1 })
-            options.merge(command.options, uniquingKeysWith: { (k1, k2) in return k1 })
-            results.append(contentsOf: command.returns)
+            helps.append(description.help)
+            arguments.merge(description.arguments, uniquingKeysWith: { (k1, k2) in return k1 })
+            options.merge(description.options, uniquingKeysWith: { (k1, k2) in return k1 })
+            results.append(contentsOf: description.returns)
         }
         
         var optionText = ""
