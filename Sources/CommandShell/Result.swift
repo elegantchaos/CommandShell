@@ -17,7 +17,8 @@ public struct Result {
     }
     
     public static let ok = Result(0, "The command executed successfully.")
-    public static let unknownCommand = Result(1, "The command was unknown.")
+    public static let running = Result(1, "The command started successfully.")
+    public static let unknownCommand = Result(2, "The command was unknown.")
     public static let badArguments = Result(3, "There was an error parsing the arguments.")
     public static let runFailed = Result(4, "Launching a sub-command failed.")
 

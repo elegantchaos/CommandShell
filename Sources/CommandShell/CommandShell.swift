@@ -40,24 +40,35 @@ public class Shell {
         Foundation.exit(result.code)
     }
     
-    public func run() {
+    public func run() -> Never {
+        var matched = false
+        
         for command in commands {
             if arguments.command(command.description.name) {
                 run(command: command)
+                matched = true
+                break
             }
         }
         
-        if let defaultCommand = defaultCommand {
+        if !matched, let defaultCommand = defaultCommand {
             run(command: defaultCommand)
+            matched = true
         }
-        
-        exit(result: .badArguments)
+
+        if !matched {
+            exit(result: .badArguments)
+        } else {
+            dispatchMain()
+        }
     }
 
     internal func run(command: Command) {
         do {
             let result = try command.run(shell: self)
-            exit(result: result)
+            if result.code != Result.running.code {
+                exit(result: result)
+            }
             
         } catch {
             exit(result: Result.runFailed.adding(supplementary: String(describing: error)))
