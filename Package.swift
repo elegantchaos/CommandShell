@@ -9,7 +9,7 @@ let package = Package(
         .library(name: "CommandShell", targets: ["CommandShell"])
     ],
     dependencies: [
-        .package(url: "https://github.com/elegantchaos/Arguments", from: "1.0.7"),
+        .package(url: "https://github.com/elegantchaos/Arguments.git", from: "1.0.7"),
     ],
     targets: [
         .target(
