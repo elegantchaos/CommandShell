@@ -5,7 +5,7 @@
 
 import Foundation
 
-public struct Result {
+public struct Result: Equatable {
     public let code: Int32
     public let description: String
     public let supplementary: String

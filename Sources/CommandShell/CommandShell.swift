@@ -5,16 +5,21 @@
 
 import Arguments
 import Foundation
+import Logger
 
 public class Shell {
     let commands: [Command]
     let defaultCommand: Command?
+    let io: IOHandler
+
     public let arguments: Arguments
-    
-    public init(commands: [Command]) {
+
+    public init(commands: [Command], commandLine: [String] = CommandLine.arguments, ioHandler: IOHandler? = nil) {
+        self.io = ioHandler ?? DefaultIOHandler()
+        let filtered = Manager.removeLoggingOptions(from: commandLine)
         self.commands = commands
-        let documentation = Shell.buildDocumentation(for: commands)
-        self.arguments = Arguments(documentation: documentation, version: "1.0")
+        let documentation = Shell.buildDocumentation(for: commands, io: io)
+        self.arguments = Arguments(documentation: documentation, version: "1.0", arguments: filtered)
 
         var defaultCommand: Command? = nil
         for command in commands {
@@ -25,24 +30,10 @@ public class Shell {
         }
         self.defaultCommand = defaultCommand
     }
-    
-    public func exit(result: Result) -> Never {
-        if result.code != 0 {
-            print("Error: \(result.description)")
-            if !result.supplementary.isEmpty {
-                print(result.supplementary)
-            }
-        } else {
-            print("Done.")
-        }
 
-        print("")
-        Foundation.exit(result.code)
-    }
-    
-    public func run() -> Never {
+    public func run() {
         var matched = false
-        
+
         for command in commands {
             if arguments.command(command.description.name) {
                 run(command: command)
@@ -50,16 +41,16 @@ public class Shell {
                 break
             }
         }
-        
+
         if !matched, let defaultCommand = defaultCommand {
             run(command: defaultCommand)
             matched = true
         }
 
         if !matched {
-            exit(result: .badArguments)
+            io.exit(result: .badArguments)
         } else {
-            dispatchMain()
+            io.waitForExit()
         }
     }
 
@@ -67,24 +58,24 @@ public class Shell {
         do {
             let result = try command.run(shell: self)
             if result.code != Result.running.code {
-                exit(result: result)
+                io.exit(result: result)
             }
-            
+
         } catch {
-            exit(result: Result.runFailed.adding(supplementary: String(describing: error)))
+            io.exit(result: Result.runFailed.adding(supplementary: String(describing: error)))
         }
     }
-    
+
     public func log(_ message: String) {
-        print(message)
+        io.log(message)
     }
-    
-    class func buildDocumentation(for commands: [Command]) -> String {
+
+    class func buildDocumentation(for commands: [Command], io: IOHandler) -> String {
         var arguments: [String:String] = [:]
         var options = [ "--help": "Show this help."]
         var helps: [String] = []
         var results: [Result] = [ .ok, .unknownCommand, .badArguments, .runFailed ]
-        
+
         let appName = CommandLine.name
         var usageText = ""
         var helpText = ""
@@ -105,59 +96,59 @@ public class Shell {
             options.merge(description.options, uniquingKeysWith: { (k1, k2) in return k1 })
             results.append(contentsOf: description.returns)
         }
-        
+
         var optionText = ""
         for option in options {
             optionText += "    \(option.key)     \(option.value)\n"
         }
-        
+
         var argumentText = ""
         for argument in arguments {
             argumentText += "    \(argument.key)    \(argument.value)\n"
         }
-        
+
         var resultText = ""
         var codesUsed: [Int32:String] = [:]
         for key in results.sorted(by: { return $0.code < $1.code }) {
             if let duplicate = codesUsed[key.code] {
-                print("Warning: duplicate code \(key.code) for \(key.description) and \(duplicate)")
+                io.log("Warning: duplicate code \(key.code) for \(key.description) and \(duplicate)")
             }
             codesUsed[key.code] = key.description
             resultText += "    \(key.code)    \(key.description)\n"
         }
-        
+
         var text = """
         Various release utilities.
-        
+
         Usage:
         \(usageText)
-        
+
         """
-        
+
         if !helpText.isEmpty {
             text += """
         Commands:
         \(helpText)
-        
+
         """
         }
-        
+
         text += """
         Arguments:
         \(argumentText)
-        
+
         Options:
         \(optionText)
-        
+
         Exit Status:
-        
+
         The command exits with one of the following values:
-        
+
         \(resultText)
-        
+
         """
-            
+
         return text
     }
-    
+
 }
