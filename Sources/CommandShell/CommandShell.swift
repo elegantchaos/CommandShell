@@ -70,6 +70,10 @@ public class Shell {
         io.log(message)
     }
 
+    public func exit(result: Result = .ok) {
+        io.exit(result: result)
+    }
+    
     class func buildDocumentation(for commands: [Command], io: IOHandler) -> String {
         var arguments: [String:String] = [:]
         var options = [ "--help": "Show this help."]
