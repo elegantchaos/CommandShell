@@ -114,7 +114,7 @@ public class Shell {
         var resultText = ""
         var codesUsed: [Int32:String] = [:]
         for key in results.sorted(by: { return $0.code < $1.code }) {
-            if let duplicate = codesUsed[key.code] {
+            if let duplicate = codesUsed[key.code], duplicate.description != key.description {
                 io.log("Warning: duplicate code \(key.code) for \(key.description) and \(duplicate)")
             }
             codesUsed[key.code] = key.description
