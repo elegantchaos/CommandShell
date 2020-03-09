@@ -3,8 +3,29 @@ name: Tests
 on: [push, pull_request]
 
 jobs:
+
+    update-linuxmain:
+        name: Update Linux Main
+        runs-on: macOS-latest
+        steps:
+        - name: Checkout
+          uses: actions/checkout@v1
+        - name: Update
+          run: swift test --generate-linuxmain
+        - name: Commit Changes
+          run: |
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git commit -m "Updated Linux Main" -a
+        - name: Push changes
+          uses: ad-m/github-push-action@master
+          with:
+            github_token: ${{ secrets.GITHUB_TOKEN }}
+
+    
     linux-50:
         name: Linux (Swift 5.0)
+        needs: update-linuxmain
         runs-on: ubuntu-latest
         container: swift:5.0
         steps:
@@ -36,8 +57,10 @@ jobs:
             mention_if: 'failure'
             url: ${{ secrets.SLACK_WEBHOOK }}
 
+    
     linux-51:
         name: Linux (Swift 5.1)
+        needs: update-linuxmain
         runs-on: ubuntu-latest
         container: swift:5.1
         steps:
@@ -69,6 +92,77 @@ jobs:
             mention_if: 'failure'
             url: ${{ secrets.SLACK_WEBHOOK }}
 
+    
+    linux-52:
+        name: Linux (Swift 5.2 Nightly)
+        needs: update-linuxmain
+        runs-on: ubuntu-latest
+        container: swiftlang/swift:nightly-5.2
+        steps:
+        - name: Checkout
+          uses: actions/checkout@v1
+        - name: Swift Version
+          run: swift --version
+        - name: Make Logs Directory
+          run: mkdir logs
+        - name: Build (Debug)
+          run: swift build -v -c debug
+        - name: Build (Release)
+          run: swift build -v -c release
+        - name: Test (Debug)
+          run: swift test -v -c debug 
+        - name: Test (Release)
+          run: swift test -v -c release -Xswiftc -enable-testing
+        - name: Upload Logs
+          uses: actions/upload-artifact@v1
+          with:
+            name: logs
+            path: logs
+        - name: Slack Notification
+          uses: elegantchaos/slatify@master
+          if: always()
+          with:
+            type: ${{ job.status }}
+            job_name: 'Linux (Swift 5.2 Nightly)'
+            mention_if: 'failure'
+            url: ${{ secrets.SLACK_WEBHOOK }}
+
+    
+    linux-n:
+        name: Linux (Swift Nightly)
+        needs: update-linuxmain
+        runs-on: ubuntu-latest
+        container: swiftlang/swift:nightly
+        steps:
+        - name: Checkout
+          uses: actions/checkout@v1
+        - name: Swift Version
+          run: swift --version
+        - name: Make Logs Directory
+          run: mkdir logs
+        - name: Build (Debug)
+          run: swift build -v -c debug
+        - name: Build (Release)
+          run: swift build -v -c release
+        - name: Test (Debug)
+          run: swift test -v -c debug 
+        - name: Test (Release)
+          run: swift test -v -c release -Xswiftc -enable-testing
+        - name: Upload Logs
+          uses: actions/upload-artifact@v1
+          with:
+            name: logs
+            path: logs
+        - name: Slack Notification
+          uses: elegantchaos/slatify@master
+          if: always()
+          with:
+            type: ${{ job.status }}
+            job_name: 'Linux (Swift Nightly)'
+            mention_if: 'failure'
+            url: ${{ secrets.SLACK_WEBHOOK }}
+
+    
     macOS-iOS-tvOS-watchOS:
         name: macOS/iOS/tvOS/watchOS
         runs-on: macOS-latest
@@ -83,94 +177,100 @@ jobs:
           run: xcodebuild -version
         - name: XC Pretty
           run: sudo gem install xcpretty-travis-formatter
+        - name: Detect Workspace & Scheme
+          run: |
+            WORKSPACE="CommandShell.xcworkspace"
+            if [[ ! -e "$WORKSPACE" ]]
+            then
+                WORKSPACE="."
+                GOTPACKAGE=$(xcodebuild -workspace . -list | (grep CommandShell-Package || true))
+                if [[ $GOTPACKAGE != "" ]]
+                then
+                    SCHEME="CommandShell-Package"
+                else
+                    SCHEME="CommandShell"
+                fi
+                MACOS_SCHEME="$SCHEME"
+                IOS_SCHEME="$SCHEME"
+                TVOS_SCHEME="$SCHEME"
+            else
+                MACOS_SCHEME="CommandShell-macOS"
+                IOS_SCHEME="CommandShell-iOS"
+                TVOS_SCHEME="CommandShell-tvOS"
+            fi
+            echo "WORKSPACE='$WORKSPACE'; SCHEME='$MACOS_SCHEME'" > names-macOS.sh
+            echo "WORKSPACE='$WORKSPACE'; SCHEME='$IOS_SCHEME'" > names-iOS.sh
+            echo "WORKSPACE='$WORKSPACE'; SCHEME='$TVOS_SCHEME'" > names-tvOS.sh
         - name: Build (macOS/Debug)
-          run: set -o pipefail; xcodebuild clean build -workspace . -scheme CommandShell -configuration Debug CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | tee logs/xcodebuild-macOS-build-debug.log | xcpretty
+          run: |
+            set -o pipefail
+            source "names-macOS.sh"
+            xcodebuild clean build -workspace "$WORKSPACE" -scheme "$SCHEME" -configuration Debug CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | tee logs/xcodebuild-macOS-build-debug.log | xcpretty
         - name: Build (macOS/Release)
-          run: set -o pipefail; xcodebuild clean build -workspace . -scheme CommandShell -configuration Release CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | tee logs/xcodebuild-macOS-build-release.log | xcpretty
+          run: |
+            set -o pipefail
+            source "names-macOS.sh"
+            xcodebuild clean build -workspace "$WORKSPACE" -scheme "$SCHEME" -configuration Release CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | tee logs/xcodebuild-macOS-build-release.log | xcpretty
         - name: Test (macOS/Debug)
           run: |
-            GOTPACKAGE=$(xcodebuild -workspace . -list | (grep CommandShell-Package || true))
-            echo "*$GOTPACKAGE*"
-            if [[ $GOTPACKAGE != "" ]]
-            then
-                SCHEME="CommandShell-Package"
-            else
-                SCHEME="CommandShell"
-            fi
             set -o pipefail
-            xcodebuild test -workspace . -scheme $SCHEME  -configuration Debug CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO  | tee logs/xcodebuild-macOS-test-debug.log | xcpretty
+            source "names-macOS.sh"
+            xcodebuild test -workspace "$WORKSPACE" -scheme "$SCHEME"  -configuration Debug CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO  | tee logs/xcodebuild-macOS-test-debug.log | xcpretty
         - name: Test (macOS/Release)
           run: |
-            GOTPACKAGE=$(xcodebuild -workspace . -list | (grep CommandShell-Package || true))
-            echo "*$GOTPACKAGE*"
-            if [[ $GOTPACKAGE != "" ]]
-            then
-                SCHEME="CommandShell-Package"
-            else
-                SCHEME="CommandShell"
-            fi
             set -o pipefail
-            xcodebuild test -workspace . -scheme $SCHEME  -configuration Release CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO ENABLE_TESTABILITY=YES | tee logs/xcodebuild-macOS-test-release.log | xcpretty
+            source "names-macOS.sh"
+            xcodebuild test -workspace "$WORKSPACE" -scheme "$SCHEME"  -configuration Release CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO ENABLE_TESTABILITY=YES | tee logs/xcodebuild-macOS-test-release.log | xcpretty
         - name: Build (iOS/Debug)
-          run: set -o pipefail; xcodebuild clean build -workspace . -scheme CommandShell -configuration Debug CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | tee logs/xcodebuild-iOS-build-debug.log | xcpretty
+          run: |
+            set -o pipefail
+            source "names-iOS.sh"
+            xcodebuild clean build -workspace "$WORKSPACE" -scheme "$SCHEME" -configuration Debug CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | tee logs/xcodebuild-iOS-build-debug.log | xcpretty
         - name: Build (iOS/Release)
-          run: set -o pipefail; xcodebuild clean build -workspace . -scheme CommandShell -configuration Release CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | tee logs/xcodebuild-iOS-build-release.log | xcpretty
+          run: |
+            set -o pipefail
+            source "names-iOS.sh"
+            xcodebuild clean build -workspace "$WORKSPACE" -scheme "$SCHEME" -configuration Release CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | tee logs/xcodebuild-iOS-build-release.log | xcpretty
         - name: Test (iOS/Debug)
           run: |
-            GOTPACKAGE=$(xcodebuild -workspace . -list | (grep CommandShell-Package || true))
-            echo "*$GOTPACKAGE*"
-            if [[ $GOTPACKAGE != "" ]]
-            then
-                SCHEME="CommandShell-Package"
-            else
-                SCHEME="CommandShell"
-            fi
             set -o pipefail
-            xcodebuild test -workspace . -scheme $SCHEME -destination "name=iPhone 11" -configuration Debug CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO  | tee logs/xcodebuild-iOS-test-debug.log | xcpretty
+            source "names-iOS.sh"
+            xcodebuild test -workspace "$WORKSPACE" -scheme "$SCHEME" -destination "name=iPhone 11" -configuration Debug CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO  | tee logs/xcodebuild-iOS-test-debug.log | xcpretty
         - name: Test (iOS/Release)
           run: |
-            GOTPACKAGE=$(xcodebuild -workspace . -list | (grep CommandShell-Package || true))
-            echo "*$GOTPACKAGE*"
-            if [[ $GOTPACKAGE != "" ]]
-            then
-                SCHEME="CommandShell-Package"
-            else
-                SCHEME="CommandShell"
-            fi
             set -o pipefail
-            xcodebuild test -workspace . -scheme $SCHEME -destination "name=iPhone 11" -configuration Release CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO ENABLE_TESTABILITY=YES | tee logs/xcodebuild-iOS-test-release.log | xcpretty
+            source "names-iOS.sh"
+            xcodebuild test -workspace "$WORKSPACE" -scheme "$SCHEME" -destination "name=iPhone 11" -configuration Release CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO ENABLE_TESTABILITY=YES | tee logs/xcodebuild-iOS-test-release.log | xcpretty
         - name: Build (tvOS/Debug)
-          run: set -o pipefail; xcodebuild clean build -workspace . -scheme CommandShell -configuration Debug CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | tee logs/xcodebuild-tvOS-build-debug.log | xcpretty
+          run: |
+            set -o pipefail
+            source "names-tvOS.sh"
+            xcodebuild clean build -workspace "$WORKSPACE" -scheme "$SCHEME" -configuration Debug CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | tee logs/xcodebuild-tvOS-build-debug.log | xcpretty
         - name: Build (tvOS/Release)
-          run: set -o pipefail; xcodebuild clean build -workspace . -scheme CommandShell -configuration Release CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | tee logs/xcodebuild-tvOS-build-release.log | xcpretty
+          run: |
+            set -o pipefail
+            source "names-tvOS.sh"
+            xcodebuild clean build -workspace "$WORKSPACE" -scheme "$SCHEME" -configuration Release CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | tee logs/xcodebuild-tvOS-build-release.log | xcpretty
         - name: Test (tvOS/Debug)
           run: |
-            GOTPACKAGE=$(xcodebuild -workspace . -list | (grep CommandShell-Package || true))
-            echo "*$GOTPACKAGE*"
-            if [[ $GOTPACKAGE != "" ]]
-            then
-                SCHEME="CommandShell-Package"
-            else
-                SCHEME="CommandShell"
-            fi
             set -o pipefail
-            xcodebuild test -workspace . -scheme $SCHEME -destination "name=Apple TV" -configuration Debug CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO  | tee logs/xcodebuild-tvOS-test-debug.log | xcpretty
+            source "names-tvOS.sh"
+            xcodebuild test -workspace "$WORKSPACE" -scheme "$SCHEME" -destination "name=Apple TV" -configuration Debug CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO  | tee logs/xcodebuild-tvOS-test-debug.log | xcpretty
         - name: Test (tvOS/Release)
           run: |
-            GOTPACKAGE=$(xcodebuild -workspace . -list | (grep CommandShell-Package || true))
-            echo "*$GOTPACKAGE*"
-            if [[ $GOTPACKAGE != "" ]]
-            then
-                SCHEME="CommandShell-Package"
-            else
-                SCHEME="CommandShell"
-            fi
             set -o pipefail
-            xcodebuild test -workspace . -scheme $SCHEME -destination "name=Apple TV" -configuration Release CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO ENABLE_TESTABILITY=YES | tee logs/xcodebuild-tvOS-test-release.log | xcpretty
+            source "names-tvOS.sh"
+            xcodebuild test -workspace "$WORKSPACE" -scheme "$SCHEME" -destination "name=Apple TV" -configuration Release CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO ENABLE_TESTABILITY=YES | tee logs/xcodebuild-tvOS-test-release.log | xcpretty
         - name: Build (watchOS/Debug)
-          run: set -o pipefail; xcodebuild clean build -workspace . -scheme CommandShell -configuration Debug CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | tee logs/xcodebuild-watchOS-build-debug.log | xcpretty
+          run: |
+            set -o pipefail
+            source "names-watchOS.sh"
+            xcodebuild clean build -workspace "$WORKSPACE" -scheme "$SCHEME" -configuration Debug CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | tee logs/xcodebuild-watchOS-build-debug.log | xcpretty
         - name: Build (watchOS/Release)
-          run: set -o pipefail; xcodebuild clean build -workspace . -scheme CommandShell -configuration Release CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | tee logs/xcodebuild-watchOS-build-release.log | xcpretty
+          run: |
+            set -o pipefail
+            source "names-watchOS.sh"
+            xcodebuild clean build -workspace "$WORKSPACE" -scheme "$SCHEME" -configuration Release CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | tee logs/xcodebuild-watchOS-build-release.log | xcpretty
         - name: Upload Logs
           uses: actions/upload-artifact@v1
           with:
