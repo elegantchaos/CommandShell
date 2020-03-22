@@ -6,9 +6,7 @@
 import Logger
 import ArgumentParser
 
-let verboseChannel = Logger("verbose", handlers: [Logger.stdoutHandler])
-
 public extension ParsableCommand {
-    var output = Logger.stdout
-    var verbose = verboseChannel
+    var output: Channel { return CommandShell.outputChannel }
+    var verbose: Channel { return CommandShell.verboseChannel }
 }

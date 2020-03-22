@@ -6,21 +6,27 @@
 import ArgumentParser
 import Foundation
 import SemanticVersion
+import Logger
 
-struct CommandShell: ParsableCommand {
-    static var configuration = CommandConfiguration(
+public struct CommandShell: ParsableCommand {
+    public static var configuration = CommandConfiguration(
         abstract: "Abstract.",
         subcommands: [],
         defaultSubcommand: nil
     )
-    
+
     static var info = loadInfoPlist()
     static var version = loadVersion()
     static var buildNumber = loadBuildNumber()
-    
+    static let outputChannel = Logger.stdout
+    static let verboseChannel = Logger("verbose", handlers: [Logger.stdoutHandler])
+
     @Flag(help: "Show the version.") var version: Bool
 
-    func run() throws {
+    public init() {
+    }
+    
+    public func run() throws {
         if version {
             print(CommandShell.version.asString)
         } else {

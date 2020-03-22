@@ -13,7 +13,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser", from: "0.0.2"),
         .package(url: "https://github.com/elegantchaos/Logger.git", from: "1.3.6"),
-        .package(url: "https://github.com/elegantchaos/SemanticVersion.git", from: "1.0.0"),
+        .package(url: "https://github.com/elegantchaos/SemanticVersion.git", from: "1.0.1"),
     ],
     targets: [
         .target(
