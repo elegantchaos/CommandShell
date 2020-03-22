@@ -2,30 +2,21 @@
   "object": {
     "pins": [
       {
-        "package": "Arguments",
-        "repositoryURL": "https://github.com/elegantchaos/Arguments.git",
-        "state": {
-          "branch": null,
-          "revision": "580f0f7886f1ac2c94358dbf042c5e00a93d69c8",
-          "version": "1.1.1"
-        }
-      },
-      {
-        "package": "Docopt",
-        "repositoryURL": "https://github.com/elegantchaos/docopt.swift.git",
-        "state": {
-          "branch": null,
-          "revision": "fe5bebd9829d1cf56bf062bca70809a09b7144b6",
-          "version": "0.6.12"
-        }
-      },
-      {
         "package": "Logger",
         "repositoryURL": "https://github.com/elegantchaos/Logger.git",
         "state": {
           "branch": null,
           "revision": "65d89667f72e480aba8ed37c3d874a0c5349a005",
           "version": "1.3.6"
+        }
+      },
+      {
+        "package": "swift-argument-parser",
+        "repositoryURL": "https://github.com/apple/swift-argument-parser",
+        "state": {
+          "branch": null,
+          "revision": "35b76bf577d3cc74820f8991894ce3bcdf024ddc",
+          "version": "0.0.2"
         }
       }
     ]

@@ -11,13 +11,19 @@ let package = Package(
         .library(name: "CommandShell", targets: ["CommandShell"])
     ],
     dependencies: [
-        .package(url: "https://github.com/elegantchaos/Arguments.git", from: "1.1.1"),
+        .package(url: "https://github.com/apple/swift-argument-parser", from: "0.0.2"),
         .package(url: "https://github.com/elegantchaos/Logger.git", from: "1.3.6"),
+        .package(url: "https://github.com/elegantchaos/SemanticVersion.git", from: "1.0.0"),
     ],
     targets: [
         .target(
             name: "CommandShell",
-            dependencies: ["Arguments", "Logger"]),
+            dependencies: [
+                "Logger",
+                "SemanticVersion",
+                .product(name: "ArgumentParser", package: "swift-argument-parser")
+            ]),
+
         .testTarget(
             name: "CommandShellTests",
             dependencies: ["CommandShell"]),
