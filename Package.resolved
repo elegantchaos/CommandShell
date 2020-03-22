@@ -11,6 +11,15 @@
         }
       },
       {
+        "package": "SemanticVersion",
+        "repositoryURL": "https://github.com/elegantchaos/SemanticVersion.git",
+        "state": {
+          "branch": null,
+          "revision": "928a0ab25d43f1c4b02b6679aa109e3cdad08a93",
+          "version": "1.0.1"
+        }
+      },
+      {
         "package": "swift-argument-parser",
         "repositoryURL": "https://github.com/apple/swift-argument-parser",
         "state": {
