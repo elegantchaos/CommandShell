@@ -3,6 +3,7 @@
 //  All code (c) 2020 - present day, Elegant Chaos Limited.
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+import ArgumentParser
 import Foundation
 import Logger
 import SemanticVersion
@@ -15,11 +16,19 @@ public class CommandEngine {
     public let output = Logger.stdout
     public let verbose = Channel("verbose", handlers: [Logger.stdoutHandler])
 
-    init(options: StandardOptions) {
+    required init(options: CommandShellOptions) {
         output.enabled = true
         verbose.enabled = options.verbose
     }
     
+    public class var configuration: CommandConfiguration {
+        return CommandConfiguration(
+            commandName: CommandShell.executable,
+            abstract: "Abstract.",
+            subcommands: [],
+            defaultSubcommand: nil
+        )
+    }
     public var name: String {
         return info["CFBundleDisplayName"] ?? CommandShell.executable
     }

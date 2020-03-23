@@ -6,13 +6,13 @@
 import ArgumentParser
 import Foundation
 
-public struct StandardOptions: ParsableArguments {
+public struct CommandShellOptions: ParsableArguments {
     @Flag(help: "Enable additional logging.") public var verbose: Bool
     
     public init() {
     }
     
-    public var engine: CommandEngine {
-        return CommandEngine(options: self)
+    public func loadEngine<Engine: CommandEngine>() -> Engine {
+        return Engine.init(options: self)
     }
 }

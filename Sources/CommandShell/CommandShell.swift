@@ -8,13 +8,10 @@ import Foundation
 import SemanticVersion
 import Logger
 
-public struct CommandShell: ParsableCommand {
-    public static var configuration = CommandConfiguration(
-        commandName: CommandShell.executable,
-        abstract: "Abstract.",
-        subcommands: [],
-        defaultSubcommand: nil
-    )
+public struct CommandShell<Engine: CommandEngine>: ParsableCommand {
+    public static var configuration: CommandConfiguration {
+        return Engine.configuration
+    }
 
     public static var executable: String {
         let url = URL(fileURLWithPath: CommandLine.arguments[0])
@@ -23,22 +20,15 @@ public struct CommandShell: ParsableCommand {
     }
     
     @Flag(help: "Show the version.") var version: Bool
-    @OptionGroup() var standard: StandardOptions
+    @OptionGroup() var options: CommandShellOptions
     
     public init() {
     }
 
-    public static func configure(abstract: String, subcommands: [ParsableCommand.Type], defaultSubcommand: ParsableCommand.Type?) {
-        configuration = CommandConfiguration(
-            commandName: CommandShell.executable,
-            abstract: abstract,
-            subcommands: subcommands,
-            defaultSubcommand: defaultSubcommand
-        )
-    }
     public func run() throws {
+        let engine = options.loadEngine()
         if version {
-            print(standard.engine.version.asString)
+            print(engine.version.asString)
         } else {
             throw CleanExit.helpRequest(self)
         }
