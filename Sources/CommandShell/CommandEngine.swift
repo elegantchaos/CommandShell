@@ -8,7 +8,11 @@ import Foundation
 import Logger
 import SemanticVersion
 
-open class CommandEngine {
+public protocol CommandEngineProtocol {
+    init(options: CommandShellOptions)
+}
+
+open class CommandEngine: CommandEngineProtocol {
     public lazy var info = loadInfoPlist()
     public lazy var version = loadVersion()
     public lazy var buildNumber = loadBuildNumber()

@@ -6,8 +6,11 @@ extension CommandShellTests {
     //   `swift test --generate-linuxmain`
     // to regenerate.
     static let __allTests__CommandShellTests = [
-        ("testBasics", testBasics),
         ("testHelp", testHelp),
+        ("testNoCommands", testNoCommands),
+        ("testSubcommand", testSubcommand),
+        ("testSubcommandVerbose", testSubcommandVerbose),
+        ("testVersion", testVersion),
     ]
 }
 

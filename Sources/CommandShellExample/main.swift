@@ -11,7 +11,7 @@ struct Subcommand: ParsableCommand {
     @OptionGroup() var common: CommandShellOptions
     
     func run() throws {
-        let engine = common.loadEngine()
+        let engine: ExampleEngine = common.loadEngine()
         engine.output.log("Hello.")
         engine.verbose.log("This is verbose output.")
     }

@@ -12,7 +12,7 @@ public struct CommandShellOptions: ParsableArguments {
     public init() {
     }
     
-    public func loadEngine<Engine: CommandEngine>() -> Engine {
+    public func loadEngine<Engine: CommandEngineProtocol>() -> Engine {
         return Engine.init(options: self)
     }
 }

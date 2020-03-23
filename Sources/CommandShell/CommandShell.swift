@@ -26,7 +26,7 @@ public struct CommandShell<Engine: CommandEngine>: ParsableCommand {
     }
 
     public func run() throws {
-        let engine = options.loadEngine()
+        let engine: Engine = options.loadEngine()
         if version {
             engine.output.log(engine.version.asString)
         } else {
@@ -34,7 +34,7 @@ public struct CommandShell<Engine: CommandEngine>: ParsableCommand {
         }
     }
 
-    public static func main() {
+    public static func main() -> Never {
         signal(SIGINT) { signal in
             Logger.defaultManager.flush()
             print("Interrupted by signal \(signal).")
