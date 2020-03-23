@@ -8,7 +8,7 @@ import Foundation
 import Logger
 import SemanticVersion
 
-public class CommandEngine {
+open class CommandEngine {
     public lazy var info = loadInfoPlist()
     public lazy var version = loadVersion()
     public lazy var buildNumber = loadBuildNumber()
@@ -16,12 +16,12 @@ public class CommandEngine {
     public let output = Logger.stdout
     public let verbose = Channel("verbose", handlers: [Logger.stdoutHandler])
 
-    required init(options: CommandShellOptions) {
+    public required init(options: CommandShellOptions) {
         output.enabled = true
         verbose.enabled = options.verbose
     }
     
-    public class var configuration: CommandConfiguration {
+    open class var configuration: CommandConfiguration {
         return CommandConfiguration(
             commandName: CommandShell.executable,
             abstract: "Abstract.",
