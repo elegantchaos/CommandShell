@@ -1,11 +1,12 @@
 import XCTest
+import XCTestExtensions
+
 @testable import CommandShell
 
 final class CommandShellTests: XCTestCase {
     func testNoCommands() {
-        let runner = XCTestRunner(for: "CommandShellExample")
-        let result = runner.run(with: [])
-        print(result?.stdout)
+        let result = run("CommandShellExample")
+        print(result.stdout)
     }
     
     // TODO: make an executable target with a test command; launch it from here and capture the output to test the shell
