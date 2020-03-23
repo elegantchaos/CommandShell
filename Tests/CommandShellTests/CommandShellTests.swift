@@ -3,37 +3,55 @@ import XCTestExtensions
 
 @testable import CommandShell
 
+
 final class CommandShellTests: XCTestCase {
+    let help = """
+        OVERVIEW: An example command.
+
+        USAGE: CommandShellExample [--version] [--verbose] <subcommand>
+
+        OPTIONS:
+          --version               Show the version.
+          --verbose               Enable additional logging.
+          -h, --help              Show help information.
+
+        SUBCOMMANDS:
+          subcommand
+        
+
+        """
+
     func testNoCommands() {
         let result = run("CommandShellExample")
-        print(result.stdout)
+        XCTAssertResult(result, status: 0, stdout: help, stderr: "")
     }
     
-    // TODO: make an executable target with a test command; launch it from here and capture the output to test the shell
-}
+    func testVersion() {
+        let result = run("CommandShellExample", arguments: ["--version"])
+        XCTAssertResult(result, status: 0, stdout: "1.0", stderr: "")
+    }
+    
+    func testHelp() {
+        let result = run("CommandShellExample", arguments: ["--help"])
+        XCTAssertResult(result, status: 0, stdout: help, stderr: "")
+    }
 
-//    var output: String = ""
-//
-//    func testBasics() {
-//        CommandShell.main(
-//
-//        let wibble = TestCommand(name: "wibble")
-//        let wobble = TestCommand(name: "wobble")
-//        let shell = Shell(commands: [wibble, wobble], commandLine: ["test", "wibble", "file"], ioHandler: TestHandler(for: self))
-//        shell.run()
-//        XCTAssertEqual(result, .ok)
-//        XCTAssertTrue(wibble.ran)
-//        XCTAssertFalse(wobble.ran)
-//    }
-//
-//    func testHelp() {
-        // TODO: can't capture the output of --help current, since Docopt logs it straight to stderr and exits.
-        //       need to put some hooks into Docopt to fix this.
-//        let wibble = TestCommand(name: "wibble")
-//        let wobble = TestCommand(name: "wobble")
-//        let shell = Shell(commands: [wibble, wobble], commandLine: ["test", "--help"], ioHandler: TestHandler(for: self))
-//        shell.run()
-//        XCTAssertEqual(result, .ok)
-//        XCTAssertEqual(output, "blah")
-//    }
-//}
+    func testSubcommand() {
+        let result = run("CommandShellExample", arguments: ["subcommand"])
+        XCTAssertResult(result, status: 0, stdout: "Hello.", stderr: "")
+    }
+
+    func testSubcommandVerbose() {
+        let result = run("CommandShellExample", arguments: ["subcommand", "--verbose"])
+        XCTAssertResult(
+            result,
+            status: 0,
+            stdout: """
+                Hello.
+                This is verbose output.
+                """,
+            stderr: ""
+        )
+    }
+
+}
