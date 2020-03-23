@@ -28,10 +28,22 @@ public struct CommandShell<Engine: CommandEngine>: ParsableCommand {
     public func run() throws {
         let engine = options.loadEngine()
         if version {
-            print(engine.version.asString)
+            print("blah")
+            engine.output.log(engine.version.asString)
         } else {
             throw CleanExit.helpRequest(self)
         }
     }
-    
+
+    static func mainWithFlush() {
+        do {
+            let command = try parseAsRoot()
+            try command.run()
+            Logger.defaultManager.flush()
+            exit()
+        } catch {
+            exit(withError: error)
+        }
+    }
+
 }
