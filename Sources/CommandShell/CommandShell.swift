@@ -28,22 +28,26 @@ public struct CommandShell<Engine: CommandEngine>: ParsableCommand {
     public func run() throws {
         let engine = options.loadEngine()
         if version {
-            print("blah")
             engine.output.log(engine.version.asString)
         } else {
             throw CleanExit.helpRequest(self)
         }
     }
 
-    static func mainWithFlush() {
+    public static func main() {
+        signal(SIGINT) { signal in
+            Logger.defaultManager.flush()
+            print("Interrupted by signal \(signal).")
+        }
+
         do {
             let command = try parseAsRoot()
             try command.run()
             Logger.defaultManager.flush()
             exit()
         } catch {
+            Logger.defaultManager.flush()
             exit(withError: error)
         }
     }
-
 }
