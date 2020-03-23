@@ -2,9 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:../SemanticVersion">
+      location = "container:">
    </FileRef>
    <FileRef
-      location = "container:">
+      location = "group:../XCTestExtensions">
    </FileRef>
 </Workspace>

@@ -8,12 +8,14 @@ let package = Package(
         .macOS(.v10_13), .iOS(.v12),
     ],
     products: [
-        .library(name: "CommandShell", targets: ["CommandShell"])
+        .library(name: "CommandShell", targets: ["CommandShell"]),
+        .executable(name: "CommandShellExample", targets: ["CommandShellExample"])
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser", from: "0.0.2"),
         .package(url: "https://github.com/elegantchaos/Logger.git", from: "1.3.6"),
         .package(url: "https://github.com/elegantchaos/SemanticVersion.git", from: "1.0.1"),
+        .package(url: "https://github.com/elegantchaos/XCTestExtensions.git", from: "1.0.9"),
     ],
     targets: [
         .target(
@@ -24,8 +26,14 @@ let package = Package(
                 .product(name: "ArgumentParser", package: "swift-argument-parser")
             ]),
 
+        .target(
+            name: "CommandShellExample",
+            dependencies: [
+                "CommandShell",
+            ]),
+
         .testTarget(
             name: "CommandShellTests",
-            dependencies: ["CommandShell"]),
+            dependencies: ["CommandShell", "CommandShellExample", "XCTestExtensions"]),
     ]
 )

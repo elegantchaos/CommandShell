@@ -21,14 +21,26 @@ open class CommandEngine {
         verbose.enabled = options.verbose
     }
     
-    open class var configuration: CommandConfiguration {
+    class var configuration: CommandConfiguration {
         return CommandConfiguration(
             commandName: CommandShell.executable,
-            abstract: "Abstract.",
-            subcommands: [],
-            defaultSubcommand: nil
+            abstract: abstract,
+            subcommands: subcommands,
+            defaultSubcommand: defaultSubcommand
         )
     }
+    
+    open class var abstract: String {
+        return "<abstract goes here>"
+    }
+    open class var subcommands: [ParsableCommand.Type] {
+        return []
+    }
+    
+    open class var defaultSubcommand: ParsableCommand.Type? {
+        return nil
+    }
+    
     public var name: String {
         return info["CFBundleDisplayName"] ?? CommandShell.executable
     }
@@ -48,6 +60,7 @@ open class CommandEngine {
             return 0
         }
     }
+    
     func loadInfoPlist() -> [String:String] {
         #if os(macOS) || os(iOS)
         if let handle = dlopen(nil, RTLD_LAZY) {
