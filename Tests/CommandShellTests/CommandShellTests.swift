@@ -22,7 +22,10 @@ final class CommandShellTests: XCTestCase {
         """
 
     func testNoCommands() {
-        let result = run("CommandShellExample")
+        let runner = XCTestRunner(for: productsDirectory.appendingPathComponent("CommandShellExample"))
+//        print(runner)
+        let result = runner.run()
+//        let result = run("CommandShellExample")
         XCTAssertResult(result, status: 0, stdout: help, stderr: "")
     }
     
