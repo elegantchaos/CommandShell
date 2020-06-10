@@ -1,4 +1,4 @@
-// swift-tools-version:5.0
+// swift-tools-version:5.2
 
 import PackageDescription
 
@@ -12,7 +12,7 @@ let package = Package(
         .executable(name: "CommandShellExample", targets: ["CommandShellExample"])
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-argument-parser", from: "0.0.4"),
+        .package(url: "https://github.com/apple/swift-argument-parser", from: "0.1.0"),
         .package(url: "https://github.com/elegantchaos/Logger.git", from: "1.5.3"),
         .package(url: "https://github.com/elegantchaos/SemanticVersion.git", from: "1.1.0"),
         .package(url: "https://github.com/elegantchaos/XCTestExtensions.git", from: "1.1.1"),

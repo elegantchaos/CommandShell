@@ -41,7 +41,7 @@ public struct CommandShell<Engine: CommandEngine>: ParsableCommand {
         }
 
         do {
-            let command = try parseAsRoot()
+            var command = try parseAsRoot()
             try command.run()
             Logger.defaultManager.flush()
             exit()

@@ -18,14 +18,13 @@ final class CommandShellTests: XCTestCase {
         SUBCOMMANDS:
           subcommand
         
+        See 'CommandShellExample help <subcommand>' for detailed help.
 
         """
 
     func testNoCommands() {
         let runner = XCTestRunner(for: productsDirectory.appendingPathComponent("CommandShellExample"))
-//        print(runner)
         let result = runner.run()
-//        let result = run("CommandShellExample")
         XCTAssertResult(result, status: 0, stdout: help, stderr: "")
     }
     
