@@ -50,8 +50,8 @@ open class CommandEngine: CommandEngineProtocol {
     }
     
     func loadVersion() -> SemanticVersion {
-        if let string = info["CFBundleShortVersionString"], let version = SemanticVersion(string) {
-            return version
+        if let string = info["CFBundleShortVersionString"] {
+            return SemanticVersion(string)
         } else {
             return SemanticVersion(1)
         }
