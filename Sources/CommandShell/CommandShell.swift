@@ -19,7 +19,7 @@ public struct CommandShell<Engine: CommandEngine>: ParsableCommand {
         
     }
     
-    @Flag(help: "Show the version.") var version: Bool = false
+    @Flag(help: "Show the version.") var version = false
     @OptionGroup() var options: CommandShellOptions
     
     public init() {
