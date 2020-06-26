@@ -7,7 +7,7 @@ import ArgumentParser
 import Foundation
 
 public struct CommandShellOptions: ParsableArguments {
-    @Flag(help: "Enable additional logging.") public var verbose = false
+    @Flag(help: "Enable additional logging.") public var verbose: Bool = false
     
     public init() {
     }
