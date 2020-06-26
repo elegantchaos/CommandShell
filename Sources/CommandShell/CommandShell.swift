@@ -38,7 +38,7 @@ public struct CommandShell<Engine: CommandEngine>: ParsableCommand {
         signal(SIGINT) { signal in
             Logger.defaultManager.flush()
             print("Interrupted by signal \(signal).")
-            Darwin.exit(signal)
+            abort()
         }
 
         do {
