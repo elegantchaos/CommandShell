@@ -19,7 +19,7 @@ public struct CommandShell<Engine: CommandEngine>: ParsableCommand {
         
     }
     
-    @Flag(help: "Show the version.") var version: Bool
+    @Flag(help: "Show the version.") var version = false
     @OptionGroup() var options: CommandShellOptions
     
     public init() {
@@ -38,6 +38,7 @@ public struct CommandShell<Engine: CommandEngine>: ParsableCommand {
         signal(SIGINT) { signal in
             Logger.defaultManager.flush()
             print("Interrupted by signal \(signal).")
+            Darwin.exit(signal)
         }
 
         do {
