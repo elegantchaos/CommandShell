@@ -9,7 +9,7 @@ import Logger
 import SemanticVersion
 
 public protocol CommandEngineProtocol {
-    init(options: CommandShellOptions)
+    init(options: CommandShellOptions, info: [String:Any]?)
 }
 
 open class CommandEngine: CommandEngineProtocol {
@@ -17,12 +17,15 @@ open class CommandEngine: CommandEngineProtocol {
     public lazy var version = loadVersion()
     public lazy var buildNumber = loadBuildNumber()
     
-    public let output = Logger.stdout
-    public let verbose = Channel("verbose", handlers: [Logger.stdoutHandler])
+    public let output = Channel.stdout
+    public let verbose = Channel("verbose", handlers: [Channel.stdoutHandler])
 
-    public required init(options: CommandShellOptions) {
+    public required init(options: CommandShellOptions, info: [String:Any]?) {
         output.enabled = true
         verbose.enabled = options.verbose
+        if let info {
+            self.info = info
+        }
     }
     
     class var configuration: CommandConfiguration {
@@ -46,11 +49,11 @@ open class CommandEngine: CommandEngineProtocol {
     }
     
     public var name: String {
-        return info["CFBundleDisplayName"] ?? CommandShell.executable
+        return (info[.nameInfoKey] as? String) ?? CommandShell.executable
     }
     
     func loadVersion() -> SemanticVersion {
-        if let string = info["CFBundleShortVersionString"] {
+        if let string = (info[.versionInfoKey] as? String) {
             return SemanticVersion(string)
         } else {
             return SemanticVersion(1)
@@ -58,14 +61,14 @@ open class CommandEngine: CommandEngineProtocol {
     }
     
     func loadBuildNumber() -> Int {
-        if let string = info["CFBundleVersion"], let build = Int(argument: string) {
+        if let string = (info[.buildInfoKey] as? String), let build = Int(argument: string) {
             return build
         } else {
             return 0
         }
     }
     
-    func loadInfoPlist() -> [String:String] {
+    func loadInfoPlist() -> [String:Any] {
         #if os(macOS) || os(iOS)
         if let handle = dlopen(nil, RTLD_LAZY) {
             defer { dlclose(handle) }
@@ -77,7 +80,7 @@ open class CommandEngine: CommandEngineProtocol {
                     let data = Data(bytesNoCopy: ptr, count: Int(size), deallocator: .none)
                     do {
                         let info = try PropertyListSerialization.propertyList(from: data, options: [], format: nil)
-                        return info as? [String:String] ?? [:]
+                        return info as? [String:Any] ?? [:]
                     } catch {
                     }
                 }
@@ -87,4 +90,10 @@ open class CommandEngine: CommandEngineProtocol {
         return [:]
     }
 
+}
+
+public extension String {
+    static let buildInfoKey = "CFBundleVersion"
+    static let nameInfoKey = "CFBundleDisplayName"
+    static let versionInfoKey = "CFBundleShortVersionString"
 }

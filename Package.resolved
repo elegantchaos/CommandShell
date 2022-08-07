@@ -6,8 +6,17 @@
         "repositoryURL": "https://github.com/elegantchaos/Logger.git",
         "state": {
           "branch": null,
-          "revision": "cd67757f696ce6c8353d874d867a49b8e2306e2f",
-          "version": "1.5.3"
+          "revision": "6dc36bcaae47498a79d01a9b41ac5ee6a26e4809",
+          "version": "1.8.0"
+        }
+      },
+      {
+        "package": "Matchable",
+        "repositoryURL": "https://github.com/elegantchaos/Matchable.git",
+        "state": {
+          "branch": null,
+          "revision": "d53e807009960aafbd54f6229c2542f906628b38",
+          "version": "1.0.7"
         }
       },
       {
@@ -15,8 +24,8 @@
         "repositoryURL": "https://github.com/elegantchaos/SemanticVersion.git",
         "state": {
           "branch": null,
-          "revision": "6bda5a45a2f687a82a0fbb002bee8ad31e44f478",
-          "version": "1.1.0"
+          "revision": "f6851038d07c1d8dc585754131995654fdcbec43",
+          "version": "1.1.1"
         }
       },
       {
@@ -24,8 +33,8 @@
         "repositoryURL": "https://github.com/apple/swift-argument-parser",
         "state": {
           "branch": null,
-          "revision": "3d79b2b5a2e5af52c14e462044702ea7728f5770",
-          "version": "0.1.0"
+          "revision": "6b2aa2748a7881eebb9f84fb10c01293e15b52ca",
+          "version": "0.5.0"
         }
       },
       {
@@ -33,8 +42,8 @@
         "repositoryURL": "https://github.com/elegantchaos/XCTestExtensions.git",
         "state": {
           "branch": null,
-          "revision": "5a6c9b3d5889d48d647f2a165c9bba8b966d3a22",
-          "version": "1.1.1"
+          "revision": "c1cec43d4ca0b657323080b90a840b675e8af638",
+          "version": "1.4.9"
         }
       }
     ]

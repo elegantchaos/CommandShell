@@ -5,6 +5,7 @@
 
 import ArgumentParser
 import Foundation
+import SemanticVersion
 
 public struct CommandShellOptions: ParsableArguments {
     @Flag(help: "Enable additional logging.") public var verbose = false
@@ -12,7 +13,7 @@ public struct CommandShellOptions: ParsableArguments {
     public init() {
     }
     
-    public func loadEngine<Engine: CommandEngineProtocol>() -> Engine {
-        return Engine.init(options: self)
+    public func loadEngine<Engine: CommandEngineProtocol>(info: [String:Any]? = nil) -> Engine {
+        return Engine.init(options: self, info: info)
     }
 }
