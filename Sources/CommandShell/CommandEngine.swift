@@ -96,4 +96,5 @@ public extension String {
     static let buildInfoKey = "CFBundleVersion"
     static let nameInfoKey = "CFBundleDisplayName"
     static let versionInfoKey = "CFBundleShortVersionString"
+    static let copyrightInfoKey = "NSHumanReadableCopyright"
 }
