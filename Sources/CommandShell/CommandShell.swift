@@ -24,6 +24,7 @@ public struct CommandShell<Engine: CommandEngine>: ParsableCommand {
     }
     
     @Flag(help: "Show the version.") var version = false
+    @Flag(help: "Show some about information.") var about = false
     @OptionGroup() var options: CommandShellOptions
     
 
@@ -32,8 +33,10 @@ public struct CommandShell<Engine: CommandEngine>: ParsableCommand {
 
     public func run() throws {
         let engine: Engine = options.loadEngine(info: commandShellExplicitInfo)
-        if version {
-            engine.output.log(engine.version.asString)
+        if about {
+            engine.output.log(engine.about)
+        } else if version {
+            engine.output.log(engine.fullVersion)
         } else {
             throw CleanExit.helpRequest(self)
         }

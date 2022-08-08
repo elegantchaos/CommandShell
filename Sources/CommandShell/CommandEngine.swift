@@ -40,6 +40,7 @@ open class CommandEngine: CommandEngineProtocol {
     open class var abstract: String {
         return "<abstract goes here>"
     }
+    
     open class var subcommands: [ParsableCommand.Type] {
         return []
     }
@@ -50,6 +51,28 @@ open class CommandEngine: CommandEngineProtocol {
     
     public var name: String {
         return (info[.nameInfoKey] as? String) ?? CommandShell.executable
+    }
+    
+    public var fullVersion: String {
+        var string = "Version \(version.asString)"
+        if let build = info[.buildInfoKey] {
+            string.append(" (\(build))")
+        }
+        
+        return string
+    }
+    
+    public var fullName: String {
+        return "\(name) \(fullVersion)"
+    }
+    
+    public var about: String {
+        var string = fullName
+        if let copyright = info[.copyrightInfoKey] {
+            string.append("\n\(copyright)")
+        }
+        
+        return string
     }
     
     func loadVersion() -> SemanticVersion {
